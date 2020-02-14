@@ -53,6 +53,10 @@ class Validator
 					}, $array);
 					$result = $this->{$func}($value, $array);
 				}
+				else if ($func === 'regex')
+				{
+					$result = $this->regex($value, $pattern);
+				}
 				else 
 				{
 					array_unshift($array, $value);
@@ -81,125 +85,175 @@ class Validator
 	}
 	
 	
-	public function min($value, $min, $type = 'string')
+	private function setValidateMethod($condition, $error)
 	{
-		if ($type === 'string')
+		if ($condition)
 		{
-			if (strlen($value) >= $min) 
-			{
-				return true;
-			}
-			else
-			{
-				$this->currentError = "This field must be $min characters minimum.";
-				
-				return false;
-			}
+			return true;
 		}
-		else if ($type === 'integer' || $type === 'double')
+		else
 		{
-			if ($value >= $min)
-			{
-				return true;
-			}
-			else
-			{
-				$this->currentError = "This value must be not not lesser than $min.";
-				
-				return false;
-			}
+			$this->currentError = $error;
+
+			return false;
 		}
 	}
 	
 	
-	public function max($value, $max, $type = 'string')
+	public function required($value)
 	{
-		if ($type === 'string')
-		{
-			if (strlen($value) <= $max) 
-			{
-				return true;
-			}
-			else
-			{
-				$this->currentError = "This field must be $max characters maximum.";
-				
-				return false;
-			}
-		}
-		else if ($type === 'integer' || $type === 'double')
-		{
-			if ($value <= $max)
-			{
-				return true;
-			}
-			else
-			{
-				$this->currentError = "This value must be not greater than $max.";
-				
-				return false;
-			}
-		}
+		$condition = !empty($value);
+		$error = "This field is required.";
+		
+		return $this->setValidateMethod($condition, $error);
 	}
 	
 	
-	public function between($value, $min, $max, $type = 'string')
+	public function min($value, $min)
 	{
-		if ($type === 'string')
-		{
-			if (strlen($value) >= $min && strlen($value) <= $max) 
-			{
-				return true;
-			}
-			else
-			{
-				$this->currentError = "This field must be between $min and $max characters.";
-				
-				return false;
-			}
-		}
-		else if ($type === 'integer' || $type === 'double')
-		{
-			if ($value >= $min && $value <= $max)
-			{
-				return true;
-			}
-			else
-			{
-				$this->currentError = "This value must be between $min and $max.";
-				
-				return false;
-			}
-		}
+		$condition = strlen($value) >= $min;
+		$error = "This field must be $min characters minimum.";
+		
+		return $this->setValidateMethod($condition, $error);
+	}
+	
+	
+	public function max($value, $max)
+	{
+		$condition = strlen($value) <= $max;
+		$error = "This field must be $max characters maximum.";
+		
+		return $this->setValidateMethod($condition, $error);
+	}
+	
+	
+	public function between($value, $min, $max)
+	{
+		$condition = strlen($value) >= $min && strlen($value) <= $max;
+		$error = "This field must be between $min and $max characters.";
+		
+		return $this->setValidateMethod($condition, $error);
 	}
 	
 	
 	public function numeric($value)
 	{
-		if (is_numeric($value))
-		{
-			return true;
-		}
-		else
-		{
-			$this->currentError = "This value must be a number.";
-
-			return false;
-		}
+		$condition = is_numeric($value);
+		$error = "This value must be a number.";
+		
+		return $this->setValidateMethod($condition, $error);
 	}
 	
 	
 	public function in($value, $list)
 	{
-		if (in_array($value, $list))
-		{
-			return true;
-		}
-		else
-		{
-			$this->currentError = "This value isn\'t valid.";
-
-			return false;
-		}
+		$condition = in_array($value, $list);
+		$error = "This value isn\'t valid.";
+		
+		return $this->setValidateMethod($condition, $error);
 	}
+	
+	
+	public function regex($value, $pattern)
+	{
+		$condition = preg_match('/'.$pattern.'/', $value);
+		$error = "This value isn\'t valid.";
+		
+		return $this->setValidateMethod($condition, $error);
+	}
+	
+	
+//	public function min($value, $min, $type = 'string')
+//	{
+//		if ($type === 'string')
+//		{
+//			if (strlen($value) >= $min) 
+//			{
+//				return true;
+//			}
+//			else
+//			{
+//				$this->currentError = "This field must be $min characters minimum.";
+//				
+//				return false;
+//			}
+//		}
+//		else if ($type === 'integer' || $type === 'double')
+//		{
+//			if ($value >= $min)
+//			{
+//				return true;
+//			}
+//			else
+//			{
+//				$this->currentError = "This value must be not not lesser than $min.";
+//				
+//				return false;
+//			}
+//		}
+//	}
+//	
+//	
+//	public function max($value, $max, $type = 'string')
+//	{
+//		if ($type === 'string')
+//		{
+//			if (strlen($value) <= $max) 
+//			{
+//				return true;
+//			}
+//			else
+//			{
+//				$this->currentError = "This field must be $max characters maximum.";
+//				
+//				return false;
+//			}
+//		}
+//		else if ($type === 'integer' || $type === 'double')
+//		{
+//			if ($value <= $max)
+//			{
+//				return true;
+//			}
+//			else
+//			{
+//				$this->currentError = "This value must be not greater than $max.";
+//				
+//				return false;
+//			}
+//		}
+//	}
+//	
+//	
+//	public function between($value, $min, $max, $type = 'string')
+//	{
+//		if ($type === 'string')
+//		{
+//			if (strlen($value) >= $min && strlen($value) <= $max) 
+//			{
+//				return true;
+//			}
+//			else
+//			{
+//				$this->currentError = "This field must be between $min and $max characters.";
+//				
+//				return false;
+//			}
+//		}
+//		else if ($type === 'integer' || $type === 'double')
+//		{
+//			if ($value >= $min && $value <= $max)
+//			{
+//				return true;
+//			}
+//			else
+//			{
+//				$this->currentError = "This value must be between $min and $max.";
+//				
+//				return false;
+//			}
+//		}
+//	}
+	
+	
 }

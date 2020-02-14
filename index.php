@@ -11,6 +11,8 @@ require_once 'libs/Form.php';
 require_once 'libs/Controller.php';
 require_once 'libs/Model.php';
 require_once 'libs/View.php';
+require_once 'libs/Hash.php';
+require_once 'libs/Session.php';
 
 require_once 'utils/Auth.php';
 require_once 'utils/Validator.php';
@@ -51,7 +53,10 @@ else {
 		}
 	}
 	else {
-		echo '404 Page not found.';
+		require_once 'controllers/error.php';
+		
+		$controller = new PageError;
+		$controller->index();
 	}
 }
 

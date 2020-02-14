@@ -9,21 +9,25 @@
 				<div class="form-group">
 					<label for="login">Login:</label>
 					<input type="login" class="form-control" id="login" name="login">
-					<small class="login-error"></small>
+					<small class="text-danger login-error">
+						<?php Session::displayOnce(['user_errors', 'login']); ?>
+					</small>
 				</div>
 				
 				<div class="form-group">
 					<label for="password">Password:</label>
 					<input type="password" class="form-control" id="password" name="password">
-					<small class="login-error"></small>
+					<small class="text-danger password-error">
+						<?php Session::displayOnce(['user_errors', 'password']); ?>
+					</small>
 				</div>
 				
 				<div class="form-group">
 					<label for="role">Permissions:</label>
 					<select class="form-control" id="role" name="role">
 						<option value="default" selected>Default</option>
-						<option value="admin">Admin</option>
-						<?php if (Auth::verify('owner')): ?>						
+						<?php if (Auth::verify('owner')): ?>	
+							<option value="admin">Admin</option>					
 							<option value="owner">Owner</option>
 						<?php endif; ?>
 					</select>
@@ -67,7 +71,7 @@
 									<?php echo $user['role']; ?>
 								</td>
 								<td class="float-right">
-									<?php if (Auth::verify('owner')): ?>
+									<?php if (Auth::hasPermission($user) || Auth::samePerson($user['id'])): ?>
 										<a href="<?php echo USER . '/edit/' . $user['id']; ?>" class="btn btn-sm btn-primary mr-3">
 											Edit
 										</a>

@@ -9,9 +9,6 @@
 				<div class="form-group">
 					<label for="login">Login:</label>
 					<input type="login" class="form-control" id="login" name="login">
-					<small class="sm">
-						
-					</small>
 				</div>
 				
 				<div class="form-group">

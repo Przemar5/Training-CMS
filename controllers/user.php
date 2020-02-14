@@ -39,9 +39,9 @@ class User extends Controller
 		];
 		$form = new Form;
 		$rules = [
-			'login' => ['between:3,55'],
-			'password' => ['between:8,45'],
-			'role' => ['in:"default","admin","owner"'],
+			'login' => ['required', 'between:3,55', 'regex:[0-9a-zA-Z _\-\.]'],
+			'password' => ['required', 'between:8,45', 'regex:[0-9a-zA-Z _\-\.]'],
+			'role' => ['required', 'in:"default","admin","owner"'],
 		];
 		
 		if ($form->validate($data, $rules))
@@ -52,7 +52,7 @@ class User extends Controller
 		}
 		else 
 		{
-			$_SESSION['errors'] = $form->validator->errors;
+			$_SESSION['user_errors'] = $form->validator->errors;
 			$form->validator->unsetErrors();
 			
 			header('Location: ' . USER . '/add');
@@ -61,48 +61,69 @@ class User extends Controller
 	
 	public function edit($id)
 	{
-		if (is_numeric($id)) 
+		if (is_numeric($id) && $user = $this->model->select($id)) 
 		{
-			$user = $this->model->select($id);
-			
-			if (!empty($user)) 
+			if (Auth::hasPermission($user) || Auth::samePerson($user['id']))
 			{
 				$this->view->title = 'Edit user';
+				$this->view->user = $user;
 				$this->view->render('user/edit');
+			}
+		}
+	}
+	
+	public function update($id)
+	{
+		if (is_numeric($id) && $user = $this->model->select($id))
+		{
+			if (Auth::hasPermission($user) || Auth::samePerson($user['id']))
+			{
+				$data = [
+					'login' => $_POST['login'],
+					'password' => $_POST['password'],
+					'role' => $_POST['role'],
+				];
+				$form = new Form;
+				$rules = [
+					'login' => ['required', 'between:3,55', 'regex:[0-9a-zA-Z _\-\.]'],
+					'password' => ['required', 'between:8,45', 'regex:[0-9a-zA-Z _\-\.]'],
+					'role' => ['required', 'in:"default","admin","owner"'],
+				];
+				
+				if ($form->validate($data, $rules))
+				{
+					$this->model->update($id, $data);
+
+					header('Location: ' . DASHBOARD);
+				}
+				else 
+				{
+					$_SESSION['user_errors'] = $form->validator->errors;
+					$form->validator->unsetErrors();
+
+					header('Location: ' . USER . '/edit/' . $id);
+				}
 			}
 		}
 	}
 	
 	public function delete($id)
 	{
-		if (is_numeric($id))
+		if (is_numeric($id) && $user = $this->model->select($id))
 		{
-			$user = $this->model->select($id);
-			print_r($user);
-
-			if (!empty($user))
+			if (Auth::hasPermission($user))
 			{
-				if ($user['role'] === 'default')
+				if ($this->model->delete($id) === 1)
 				{
-					if ($this->model->delete($id))
-					{
-						header('Location: ' . DASHBOARD);
-					}
+					header('Location: ' . DASHBOARD);
 				}
-				else if ($user['role'] === 'admin')
+			}
+			else if (Auth::samePerson($user['id']))
+			{
+				if ($this->model->delete($id) === 1)
 				{
-					if (is_numeric($_SESSION['user_id']))
-					{
-						$loggedUser = $this->model->select($_SESSION['user_id']);
-						
-						if ($loggedUser['role'] === 'owner')
-						{
-							if ($this->model->delete($id))
-							{
-								header('Location: ' . DASHBOARD);
-							}
-						}
-					}
+					unset($_SESSION['user_id']);
+					header('Location: ' . LOGIN);
 				}
 			}
 		}

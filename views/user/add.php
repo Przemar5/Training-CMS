@@ -6,7 +6,7 @@
 			<label for="login">Login:</label>
 			<input type="login" class="form-control" id="login" name="login">
 			<small class="text-danger login-error">
-				<?php if (isset($this->errors['login'])) echo $this->errors['login']; ?>
+				<?php Session::displayOnce(['user_errors', 'login']); ?>
 			</small>
 		</div>
 
@@ -14,7 +14,7 @@
 			<label for="password">Password:</label>
 			<input type="password" class="form-control" id="password" name="password">
 			<small class="text-danger password-error">
-				<?php if (isset($this->errors['password'])) echo $this->errors['password']; ?>
+				<?php Session::displayOnce(['user_errors', 'password']); ?>
 			</small>
 		</div>
 

@@ -10,14 +10,23 @@ class Auth
 		//$this->db = new Database;
 	}
 	
+	private static function getDb()
+	{
+		if (empty(self::$db)) {
+			self::$db = new Database;
+		}
+		
+		return self::$db;
+	}
+	
 	public static function verify($mode = 'admin')
 	{
 		$pattern = '/[0-9a-zA-Z _]/';
 		
 		if (isset($_SESSION['user_id']) && preg_match($pattern, $_SESSION['user_id'])) 
 		{
-			self::$db = new Database;
-			$result = self::$db->select('users', 'role', ['id' => $_SESSION['user_id']]);
+			$db = self::getDb();
+			$result = $db->select('users', 'role', ['id' => $_SESSION['user_id']]);
 			
 			if ($result) 
 			{
@@ -35,6 +44,38 @@ class Auth
 			else 
 			{
 				return false;
+			}
+		}
+	}
+	
+	public static function samePerson($id)
+	{
+		if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id']))
+		{
+			$db = self::getDb();
+			$loggedPerson = $db->select('users', 'id', ['id' => $_SESSION['user_id']]);
+			
+			if ($loggedPerson['id'] === $id)
+			{
+				return true;
+			}
+		}
+	}
+	
+	public static function hasPermission($user)
+	{
+		if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id']))
+		{
+			$db = self::getDb();
+			$loggedPerson = $db->select('users', 'role', ['id' => $_SESSION['user_id']]);
+			
+			if (!empty($loggedPerson))
+			{
+				if ($user['role'] === 'default' ||
+				   ($user['role'] === 'admin' && $loggedPerson['role'] === 'owner'))
+				{
+					return true;
+				}
 			}
 		}
 	}

@@ -106,6 +106,45 @@ class Database extends PDO
 		return $rows;
 	}
 	
+	public function update($table, $data, $where)
+	{
+		if (count($data))
+		{
+			$values = array_map(function($key) {
+				return "$key = :$key";
+			}, array_keys($data));
+			$values = implode(", ", $values);
+			$params = $data;
+			
+			if (!empty($where)) 
+			{
+				if (gettype($where) === 'string') 
+				{
+					$condition = "WHERE " . $where;
+				}
+				else if (gettype($where) === 'array') 
+				{
+					$condition = array_map(function($key) {
+						return "$key = :$key";
+					}, array_keys($where));
+					$condition = "WHERE " . implode(' AND ', $condition);
+					$params = $where;
+				}
+			}
+			else 
+			{
+				$condition = "";
+			}
+			
+			$query = "UPDATE $table SET $values $condition";
+			$stmt = $this->prepare($query);
+			$stmt->execute($params);
+			$rows = $stmt->rowCount();
+			
+			return $rows;
+		}
+	}
+	
 	public function delete($table, $where)
 	{
 		$params = [];

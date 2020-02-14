@@ -19,16 +19,14 @@
 							</a>
 						</li>
 
-						<?php if (Auth::verify('owner')): ?>
-							<li class="nav-item <?php if ($this->isUser) echo 'active'; ?>">
-								<a class="nav-link" href="<?php echo USER; ?>">
-									User 
-									<?php if (isset($this->isUser) && $this->isUser === true): ?>
-										<span class="sr-only">(current)</span>
-									<?php endif; ?>
-								</a>
-							</li>
-						<?php endif; ?>
+						<li class="nav-item <?php if ($this->isUser) echo 'active'; ?>">
+							<a class="nav-link" href="<?php echo USER; ?>">
+								User 
+								<?php if (isset($this->isUser) && $this->isUser === true): ?>
+									<span class="sr-only">(current)</span>
+								<?php endif; ?>
+							</a>
+						</li>
 
 						<li class="nav-item">
 							<a class="nav-link" href="<?php echo LOGOUT; ?>">

@@ -18,6 +18,11 @@ class User_Model extends Model
 		return $this->db->insert('users', $data);
 	}
 	
+	public function update($id, $data)
+	{
+		return $this->db->update('users', $data, "id = $id");
+	}
+	
 	public function delete($id)
 	{
 		return $this->db->delete('users', "id = $id");
