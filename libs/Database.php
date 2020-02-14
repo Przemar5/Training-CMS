@@ -25,56 +25,24 @@ class Database extends PDO
 		return self::$instance;
 	}
 	
+	
 	public function __construct()
 	{
-		//echo self::$DB_TYPE;
 		$dsn = 'mysql' . ':host=' . 'localhost' . ';dbname=' . 'projects_mvc_cms;';
 		
 		parent::__construct($dsn, 'root', '');
 	}
 	
+	
 	public function select($table, $values, $where = [], $fetchMode = PDO::FETCH_ASSOC)
 	{
-		if (!empty($values)) 
-		{
-			if (gettype($values) === 'string') 
-			{
-				$valuesList = $values;
-			}
-			else if (gettype($values) === 'array') 
-			{
-				$valuesList = implode(', ', $values);
-			}
-		}
-		else 
-		{
-			$valuesList = "*";
-		}
+		$valuesList = $this->getCondition($values, "", "*");
 		
-		$params = [];
-		if (!empty($where)) 
-		{
-			if (gettype($where) === 'string') 
-			{
-				$condition = "WHERE " . $where;
-			}
-			else if (gettype($where) === 'array') 
-			{
-				$condition = array_map(function($key) {
-					return "$key = :$key";
-				}, array_keys($where));
-				$condition = "WHERE " . implode(' AND ', $condition);
-				$params = $where;
-			}
-		}
-		else 
-		{
-			$condition = "";
-		}
+		$params = (gettype($where) === 'array') ? $where : [];
+		$condition = $this->getCondition($where, "WHERE ");
 		
 		$query = "SELECT $valuesList FROM $table $condition";
-		$stmt = $this->prepare($query);
-		$stmt->execute($params);
+		$stmt = $this->sendQuery($query, $params);
 		$rows = $stmt->rowCount();
 		
 		if ($rows > 1) 
@@ -87,113 +55,102 @@ class Database extends PDO
 		}
 	}
 	
+	
 	public function insert($table, $data)
 	{
 		$keys = array_keys($data);
 		$keysPart = implode(', ', $keys);
-		$valuesPart = implode(', ', array_map(
-			function($key) {
-				return ":$key";
-			},
-			$keys
-		));
+		$closure = function($e) {
+			return ":$e";
+		};
+		
+		$valuesPart = $this->listValues($keys, ", ", $closure);
 		
 		$query = "INSERT INTO $table ($keysPart) VALUES ($valuesPart)";
-		$stmt = $this->prepare($query);
-		$stmt->execute($data);
+		$stmt = $this->sendQuery($query, $data);
 		$rows = $stmt->rowCount();
 		
 		return $rows;
 	}
 	
+	
 	public function update($table, $data, $where)
 	{
 		if (count($data))
 		{
-			$values = array_map(function($key) {
+			$closure = function($key) {
 				return "$key = :$key";
-			}, array_keys($data));
-			$values = implode(", ", $values);
+			};
+			$values = $this->listValues(array_keys($data), ", ", $closure);
 			$params = $data;
 			
-			if (!empty($where)) 
+			if (gettype($where) === 'array')
 			{
-				if (gettype($where) === 'string') 
-				{
-					$condition = "WHERE " . $where;
-				}
-				else if (gettype($where) === 'array') 
-				{
-					$condition = array_map(function($key) {
-						return "$key = :$key";
-					}, array_keys($where));
-					$condition = "WHERE " . implode(' AND ', $condition);
-					$params = $where;
-				}
+				$params = array_merge($params, $where);
 			}
-			else 
-			{
-				$condition = "";
-			}
+			$condition = $this->getCondition($where, "WHERE ");
 			
 			$query = "UPDATE $table SET $values $condition";
-			$stmt = $this->prepare($query);
-			$stmt->execute($params);
+			$stmt = $this->sendQuery($query, $params);
 			$rows = $stmt->rowCount();
 			
 			return $rows;
 		}
 	}
 	
+	
 	public function delete($table, $where)
 	{
-		$params = [];
-		if (!empty($where)) 
-		{
-			if (gettype($where) === 'string') 
-			{
-				$condition = "WHERE " . $where;
-			}
-			else if (gettype($where) === 'array') 
-			{
-				$condition = array_map(function($key) {
-					return "$key = :$key";
-				}, array_keys($where));
-				$condition = "WHERE " . implode(' AND ', $condition);
-				$params = $where;
-			}
-		}
-		else 
-		{
-			$condition = "";
-		}
+		$params = (gettype($where) === 'array') ? $where : [];
+		$condition = $this->getCondition($where, "WHERE ");
 		
 		$query = "DELETE FROM $table $condition LIMIT 1";
-		$stmt = $this->prepare($query);
-		$stmt->execute($params);
+		$stmt = $this->sendQuery($query, $params);
 		$rows = $stmt->rowCount();
 		
 		return $rows;
 	}
 	
-	private function fetchRequest($list, $possibleOutputs, $mode = 'default', $separator = ', ')
+	
+	private function sendQuery($query, $params)
 	{
-		if (!empty($list)) 
+		$stmt = $this->prepare($query);
+		$stmt->execute($params);
+		
+		return $stmt;
+	}
+	
+	
+	private function listValues($values, $separator = ", ", $closure)
+	{
+		if (empty($closure))
 		{
-			if (gettype($list) === 'string') 
+			$closure = function($a) {	return $a;	};
+		}
+		
+		return implode($separator, array_map($closure, $values));
+	}
+	
+	
+	private function getCondition($where, $start = "", $alternative = "")
+	{
+		if (!empty($where)) 
+		{
+			if (gettype($where) === 'string') 
 			{
-				return $possibleOutputs[0];
+				return $start . $where;
 			}
-			else if (gettype($list) === 'array') 
+			else if (gettype($where) === 'array') 
 			{
-				if ($mode === 'default') {
-					return implode($separator, $list);
-				}
+				$closure = function($key) {		return "$key = :$key";		};
+				$string = $this->listValues(array_keys($where), " AND ", $closure);
+				
+				return $start . $string;
 			}
 		}
-		else 
+		else
 		{
-			return $possibleOutputs[2];
+			return $alternative;
 		}
 	}
 }

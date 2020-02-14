@@ -33,7 +33,7 @@ if ($length === 0 || empty($url[0])) {
 else {
 	$requestedFile = 'controllers/' . $url[0] . '.php';
 	
-	if (file_exists($requestedFile)) {
+	if (is_readable($requestedFile)) {
 		require_once $requestedFile;
 	
 		$controller = new $url[0];
@@ -59,20 +59,4 @@ else {
 		$controller->index();
 	}
 }
-
-//
-//$requestedFile = 'controllers/' . $url[0] . '.php';
-//
-//if (file_exists($requestedFile)) {
-//	require_once $requestedFile;
-//	
-//	$controller = new $url[0];
-//	
-//	if (isset($url[1])) {
-//		$controller->{$url[1]}();
-//	}
-//	else {
-//		$controller->index();
-//	}
-//}
 

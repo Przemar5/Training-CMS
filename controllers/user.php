@@ -39,8 +39,8 @@ class User extends Controller
 		];
 		$form = new Form;
 		$rules = [
-			'login' => ['required', 'between:3,55', 'regex:[0-9a-zA-Z _\-\.]'],
-			'password' => ['required', 'between:8,45', 'regex:[0-9a-zA-Z _\-\.]'],
+			'login' => ['required', 'between:3,55', 'regex:[0-9a-zA-Z _\-\.]+'],
+			'password' => ['required', 'between:8,45', 'regex:[0-9a-zA-Z _\-\.]+'],
 			'role' => ['required', 'in:"default","admin","owner"'],
 		];
 		
@@ -85,8 +85,8 @@ class User extends Controller
 				];
 				$form = new Form;
 				$rules = [
-					'login' => ['required', 'between:3,55', 'regex:[0-9a-zA-Z _\-\.]'],
-					'password' => ['required', 'between:8,45', 'regex:[0-9a-zA-Z _\-\.]'],
+					'login' => ['required', 'between:3,55', 'regex:[0-9a-zA-Z _\-\.]+'],
+					'password' => ['required', 'between:8,45', 'regex:[0-9a-zA-Z _\-\.]+'],
 					'role' => ['required', 'in:"default","admin","owner"'],
 				];
 				
