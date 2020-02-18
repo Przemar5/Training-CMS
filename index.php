@@ -23,10 +23,9 @@ require_once 'utils/Validator.php';
 require_once 'models/user_tokens_model.php';
 
 
+$userId = Cookie::get('user_id');
 
-$userId = Cookie::get(REMEMBER_ME_COOKIE_NAME_CONSTANT);
-
-if ($userId && !Session::exists(USER_ID_SESSION_NAME))
+if ($userId /*&& !Session::exists(USER_ID_SESSION_NAME)*/)
 {
 	$db = Database::getInstance();
 	$result = $db->select('users', 'id, login, remember_me', ['id' => $userId]);
@@ -42,18 +41,21 @@ if ($userId && !Session::exists(USER_ID_SESSION_NAME))
 		
 		if ($rememberToken['value'] === $result['id'])
 		{
-			$_SESSION[USER_ID_SESSION_NAME] = $result['id'];
-
-			Cookie::set(REMEMBER_ME_COOKIE_NAME_CONSTANT, 
-						$result['id'], 
-						REMEMBER_ME_COOKIE_EXPIRY);
+			$data = [
+				'user_id' => $result['id'],
+				'field' => 'login'
+			];
+			$loginToken = $userTokens->getBy($data)[0];
+			
+			if ($loginToken['value'] === $result['login'])
+			{
+				$_SESSION[USER_ID_SESSION_NAME] = $result['id'];
+				
+				Cookie::set('user_id', $result['id'], REMEMBER_ME_COOKIE_EXPIRY);
+			}
 		}
 	}
 }
-//die;
-//dd($_COOKIE);
-
-
 //dd($_COOKIE);
 
 $url = isset($_GET['url']) ? $_GET['url'] : null;
