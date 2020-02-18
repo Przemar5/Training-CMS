@@ -3,26 +3,21 @@
 
 class Database extends PDO
 {
-	private static $instance = null;
-//	private const BD_TYPE = 'mysql';
-//	private const BD_HOST = 'localhost';
-//	private const BD_USER = 'root';
-//	private const BD_PASS = '';
-//	private const BD_NAME = 'projects_mvc_cms';
-//	private static $BD_TYPE = 'mysql';
-//	private static $BD_HOST = 'localhost';
-//	private static $BD_USER = 'root';
-//	private static $BD_PASS = '';
-//	private static $BD_NAME = 'projects_mvc_cms';
+	private static $_instance = null;
+	private const BD_TYPE = 'mysql';
+	private const BD_HOST = 'localhost';
+	private const BD_USER = 'root';
+	private const BD_PASS = '';
+	private const BD_NAME = 'projects_mvc_cms';
 	
 	public static function getInstance()
 	{
-		if (empty(self::$instance)) 
+		if (!isset(self::$_instance)) 
 		{
-			self::$instance = new self;
+			self::$_instance = new self;
 		}
 		
-		return self::$instance;
+		return self::$_instance;
 	}
 	
 	

@@ -16,4 +16,13 @@ class Login_Model extends Model
 		
 		return $stmt->fetch(PDO::FETCH_ASSOC);
 	}
+	
+	public function remember($id)
+	{
+		$sql = 'UPDATE users SET remember_me = 1 WHERE id = :id';
+		$stmt = $this->db->prepare($sql);
+		$stmt->execute(['id' => $id]);
+		
+		return $stmt->rowCount();
+	}
 }

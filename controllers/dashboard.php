@@ -24,11 +24,4 @@ class Dashboard extends Controller
 		$this->view->title = 'Dashboard';
 		$this->view->render('dashboard/index');
 	}
-	
-	public function logout()
-	{
-		unset($_SESSION['user_id']);
-		
-		header('Location: ' . INDEX);
-	}
 }

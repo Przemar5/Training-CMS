@@ -7,7 +7,7 @@ define('CONTACT', BASE_URL . 'contact');
 define('LOGIN', BASE_URL . 'login');
 define('DASHBOARD', BASE_URL . 'dashboard');
 define('USER', BASE_URL . 'user');
-define('LOGOUT', BASE_URL . 'dashboard/logout');
+define('LOGOUT', BASE_URL . 'login/logout');
 
 define('VIEWS', BASE_URL . 'views/');
 define('MODELS', BASE_URL . 'models/');

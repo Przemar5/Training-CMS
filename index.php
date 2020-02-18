@@ -4,10 +4,12 @@ if (!isset($_SESSION)) {
 	session_start();
 }
 
+require_once 'config/config.php';
 require_once 'config/paths.php';
 
 require_once 'libs/Database.php';
 require_once 'libs/Form.php';
+require_once 'libs/Cookie.php';
 require_once 'libs/Controller.php';
 require_once 'libs/Model.php';
 require_once 'libs/View.php';
@@ -15,7 +17,44 @@ require_once 'libs/Hash.php';
 require_once 'libs/Session.php';
 
 require_once 'utils/Auth.php';
+require_once 'utils/helpers.php';
 require_once 'utils/Validator.php';
+
+require_once 'models/user_tokens_model.php';
+
+
+
+$userId = Cookie::get(REMEMBER_ME_COOKIE_NAME_CONSTANT);
+
+if ($userId && !Session::exists(USER_ID_SESSION_NAME))
+{
+	$db = Database::getInstance();
+	$result = $db->select('users', 'id, login, remember_me', ['id' => $userId]);
+	
+	if ($result['remember_me'] == 1)
+	{
+		$data = [
+			'user_id' => $result['id'],
+			'field' => 'remember_me'
+		];
+		$userTokens = new User_Tokens_Model;
+		$rememberToken = $userTokens->getBy($data)[0];
+		
+		if ($rememberToken['value'] === $result['id'])
+		{
+			$_SESSION[USER_ID_SESSION_NAME] = $result['id'];
+
+			Cookie::set(REMEMBER_ME_COOKIE_NAME_CONSTANT, 
+						$result['id'], 
+						REMEMBER_ME_COOKIE_EXPIRY);
+		}
+	}
+}
+//die;
+//dd($_COOKIE);
+
+
+//dd($_COOKIE);
 
 $url = isset($_GET['url']) ? $_GET['url'] : null;
 $url = rtrim($url, '/');
