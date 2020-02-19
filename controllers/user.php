@@ -21,6 +21,7 @@ class User extends Controller
 	public function index()
 	{
 		$this->view->title = 'Users';
+		$this->view->user = $this->model->select($_SESSION[USER_ID_SESSION_NAME]);
 		$this->view->render('user/index');
 	}
 	
@@ -46,6 +47,7 @@ class User extends Controller
 		
 		if ($form->validate($data, $rules))
 		{
+			$data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 			$this->model->create($data);
 			
 			header('Location: ' . DASHBOARD);
@@ -80,7 +82,7 @@ class User extends Controller
 			{
 				$data = [
 					'login' => $_POST['login'],
-					'password' => $_POST['password'],
+					'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
 					'role' => $_POST['role'],
 				];
 				$form = new Form;
@@ -92,6 +94,7 @@ class User extends Controller
 				
 				if ($form->validate($data, $rules))
 				{
+					$data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 					$this->model->update($id, $data);
 
 					header('Location: ' . DASHBOARD);

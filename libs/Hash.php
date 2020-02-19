@@ -2,11 +2,8 @@
 
 class Hash
 {
-	public static function create($algo, $data, $salt)
+	public static function create($data, $algorithm = PASSWORD_DEFAULT, $options = ['cost' => 10])
 	{
-		$context = hash_init($algo, HASH_HMAC, HASH_KEY);
-		hash_update($context, $data);
-		
-		return hash_final($context);
+		return password_hash($data, $algorithm, $options);
 	}
 }

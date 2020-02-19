@@ -59,29 +59,53 @@
 					</thead>
 
 					<tbody>
-						<?php foreach ($this->users as $user): ?>
+						<?php if (!isset($this->users['id'])): ?>
+							<?php foreach ($this->users as $user): ?>
+								<tr>
+									<td>
+										<?php echo $user['id']; ?>
+									</td>
+									<td>
+										<?php echo $user['login']; ?>
+									</td>
+									<td>
+										<?php echo $user['role']; ?>
+									</td>
+									<td class="float-right">
+										<?php if (Auth::hasPermission($user) || Auth::samePerson($user['id'])): ?>
+											<a href="<?php echo USER . '/edit/' . $user['id']; ?>" class="btn btn-sm btn-primary mr-3">
+												Edit
+											</a>
+											<a href="<?php echo USER . '/delete/' . $user['id']; ?>" class="btn btn-sm btn-danger">
+												Delete
+											</a>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						<?php else: ?>
 							<tr>
 								<td>
-									<?php echo $user['id']; ?>
+									<?php echo $this->users['id']; ?>
 								</td>
 								<td>
-									<?php echo $user['login']; ?>
+									<?php echo $this->users['login']; ?>
 								</td>
 								<td>
-									<?php echo $user['role']; ?>
+									<?php echo $this->users['role']; ?>
 								</td>
 								<td class="float-right">
-									<?php if (Auth::hasPermission($user) || Auth::samePerson($user['id'])): ?>
-										<a href="<?php echo USER . '/edit/' . $user['id']; ?>" class="btn btn-sm btn-primary mr-3">
+									<?php if (Auth::hasPermission($this->users) || Auth::samePerson($this->users['id'])): ?>
+										<a href="<?php echo USER . '/edit/' . $this->users['id']; ?>" class="btn btn-sm btn-primary mr-3">
 											Edit
 										</a>
-										<a href="<?php echo USER . '/delete/' . $user['id']; ?>" class="btn btn-sm btn-danger">
+										<a href="<?php echo USER . '/delete/' . $this->users['id']; ?>" class="btn btn-sm btn-danger">
 											Delete
 										</a>
 									<?php endif; ?>
 								</td>
 							</tr>
-						<?php endforeach; ?>
+						<?php endif; ?>
 					</tbody>
 				</table>
 

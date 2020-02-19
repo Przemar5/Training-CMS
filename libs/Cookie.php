@@ -5,8 +5,7 @@ class Cookie
 {
 	public static function generateValue($salt, $value)
 	{
-		return password_hash($salt . $value, 
-							 PASSWORD_DEFAULT);
+		return $salt . $value;
 	}
 	
 	public static function set($name, $value, $expiry)

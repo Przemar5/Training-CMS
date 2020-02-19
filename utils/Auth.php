@@ -27,7 +27,7 @@ class Auth
 		{
 			$db = self::getDb();
 			$result = $db->select('users', 'id, role', ['id' => $_SESSION[USER_ID_SESSION_NAME]]);
-//			dd($result);
+
 			if ($result) 
 			{
 				$role = $result['role'];

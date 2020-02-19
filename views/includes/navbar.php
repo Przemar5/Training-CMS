@@ -21,7 +21,7 @@
 
 						<li class="nav-item <?php if ($this->isUser) echo 'active'; ?>">
 							<a class="nav-link" href="<?php echo USER; ?>">
-								User 
+								Profile 
 								<?php if (isset($this->isUser) && $this->isUser === true): ?>
 									<span class="sr-only">(current)</span>
 								<?php endif; ?>

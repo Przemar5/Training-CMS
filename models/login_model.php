@@ -10,7 +10,7 @@ class Login_Model extends Model
 	
 	public function select($data)
 	{
-		$sql = 'SELECT * FROM users WHERE login = :login AND password = :password';
+		$sql = 'SELECT * FROM users WHERE login = :login';
 		$stmt = $this->db->prepare($sql);
 		$stmt->execute($data);
 		
