@@ -22,4 +22,14 @@ class User_Tokens_Model extends Model
 		
 		return $stmt->rowCount();
 	}
+	
+	public function delete($id)
+	{
+		return $stmt = $this->db->delete('user_tokens', ['id' => $id], 1);
+	}
+	
+	public function deleteBy($data)
+	{
+		return $stmt = $this->db->delete('user_tokens', $data, '');
+	}
 }

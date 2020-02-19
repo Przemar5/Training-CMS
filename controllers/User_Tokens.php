@@ -8,8 +8,10 @@ class User_Tokens extends Controller
 		parent::__construct();
 	}
 	
-	public function add()
+	public function create()
 	{
-		echo 'goog';
+		$this->loadModel('User_Tokens');
+		
+		
 	}
 }

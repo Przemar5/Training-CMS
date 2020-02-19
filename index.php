@@ -23,39 +23,70 @@ require_once 'utils/Validator.php';
 require_once 'models/user_tokens_model.php';
 
 
-$userId = Cookie::get('user_id');
-
-if ($userId /*&& !Session::exists(USER_ID_SESSION_NAME)*/)
+if (Cookie::exists('user_id') && $userId = Cookie::get('user_id') /*&& !Session::exists(USER_ID_SESSION_NAME)*/)
 {
 	$db = Database::getInstance();
-	$result = $db->select('users', 'id, login, remember_me', ['id' => $userId]);
+	$result = $db->select('user_tokens', 'id, user_id, ending_at', ['value' => $userId], PDO::FETCH_OBJ);
+	$token = (gettype($result) === 'array') ? $result[0] : $result; 
 	
-	if ($result['remember_me'] == 1)
+	if ($token) 
 	{
-		$data = [
-			'user_id' => $result['id'],
-			'field' => 'remember_me'
-		];
-		$userTokens = new User_Tokens_Model;
-		$rememberToken = $userTokens->getBy($data)[0];
-		
-		if ($rememberToken['value'] === $result['id'])
+		if($token->ending_at > date('Y-m-d H-i-s', time()))
 		{
-			$data = [
-				'user_id' => $result['id'],
-				'field' => 'login'
-			];
-			$loginToken = $userTokens->getBy($data)[0];
+			$user = $db->select('users', 'remember_me', ['id' => $token->user_id]);
 			
-			if ($loginToken['value'] === $result['login'])
+			if ($user['remember_me'] == 1)
 			{
-				$_SESSION[USER_ID_SESSION_NAME] = $result['id'];
-				
-				Cookie::set('user_id', $result['id'], REMEMBER_ME_COOKIE_EXPIRY);
+				$_SESSION[USER_ID_SESSION_NAME] = $token->user_id;
+
+				Cookie::set('user_id', $token->user_id, REMEMBER_ME_COOKIE_EXPIRY);
 			}
+		}
+		else 
+		{
+			$userTokens = new User_Tokens_Model;
+			$userTokens->deleteBy([
+				'field' => 'remember_me',
+				'user_id' => $token->user_id,
+			]);
 		}
 	}
 }
+
+
+//$userId = Cookie::get('user_id');
+//
+//if ($userId /*&& !Session::exists(USER_ID_SESSION_NAME)*/)
+//{
+//	$db = Database::getInstance();
+//	$result = $db->select('users', 'id, login, remember_me', ['id' => $userId]);
+//	
+//	if ($result['remember_me'] == 1)
+//	{
+//		$data = [
+//			'user_id' => $result['id'],
+//			'field' => 'remember_me'
+//		];
+//		$userTokens = new User_Tokens_Model;
+//		$rememberToken = $userTokens->getBy($data)[0];
+//		
+//		if ($rememberToken['value'] === $result['id'])
+//		{
+//			$data = [
+//				'user_id' => $result['id'],
+//				'field' => 'login'
+//			];
+//			$loginToken = $userTokens->getBy($data)[0];
+//			
+//			if ($loginToken['value'] === $result['login'])
+//			{
+//				$_SESSION[USER_ID_SESSION_NAME] = $result['id'];
+//				
+//				Cookie::set('user_id', $result['id'], REMEMBER_ME_COOKIE_EXPIRY);
+//			}
+//		}
+//	}
+//}
 //dd($_COOKIE);
 
 $url = isset($_GET['url']) ? $_GET['url'] : null;

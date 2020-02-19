@@ -94,12 +94,13 @@ class Database extends PDO
 	}
 	
 	
-	public function delete($table, $where)
+	public function delete($table, $where, $limit)
 	{
 		$params = (gettype($where) === 'array') ? $where : [];
 		$condition = $this->getCondition($where, "WHERE ");
+		$limit = (!empty($limit)) ? "LIMIT $limit" : "";
 		
-		$query = "DELETE FROM $table $condition LIMIT 1";
+		$query = "DELETE FROM $table $condition $limit";
 		$stmt = $this->sendQuery($query, $params);
 		$rows = $stmt->rowCount();
 		

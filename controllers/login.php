@@ -29,38 +29,7 @@ class Login extends Controller
 		{
 			if (isset($_POST['remember']) && $_POST['remember'] === 'on')
 			{
-//				$value = Cookie::generateValue(REMEMBER_ME_COOKIE_VALUE_CONSTANT,
-//											   $result['id']);
-				$value = $result['id'];
-				Cookie::set('user_id', $value, REMEMBER_ME_COOKIE_EXPIRY);
-				$this->model->remember($result['id']);
-				
-				$data = [
-					'type' => 'cookie',
-					'field' => 'remember_me',
-					'value' => $value,
-					'user_id' => $result['id'],
-					'ending_at' => 'UNIX_TIMESTAMP() + ' . REMEMBER_ME_COOKIE_EXPIRY
-				];
-				
-				$userTokens = new User_Tokens_Model;
-				$userTokens->create($data);
-				
-				
-//				$value = Cookie::generateValue(LOGIN_COOKIE_VALUE_CONSTANT,
-//											   $result['id']);
-				$value = $result['login'];
-				Cookie::set('login', $result['login'], LOGIN_COOKIE_EXPIRY);
-				
-				$data = [
-					'type' => 'cookie',
-					'field' => 'login',
-					'value' => $value,
-					'user_id' => $result['id'],
-					'ending_at' => 'UNIX_TIMESTAMP() + ' . LOGIN_COOKIE_EXPIRY
-				];
-				
-				$userTokens->create($data);
+				$this->createRememberToken($result['id']);
 			}
 			
 			$_SESSION[USER_ID_SESSION_NAME] = $result['id'];
@@ -83,5 +52,26 @@ class Login extends Controller
 		setcookie('login', '', time() - 1, '/');
 		
 		header('Location: ' . INDEX);
+	}
+	
+	private function createRememberToken($id)
+	{
+		$value = $id;
+		Cookie::set('user_id', $value, REMEMBER_ME_COOKIE_EXPIRY);
+		$this->model->remember($id);
+		$uAgent = $_SERVER['HTTP_USER_AGENT'];
+		$uAgent = preg_replace('/(\(.+\))|(\/([.\d]+))/', '', $uAgent);
+
+		$data = [
+			'type' => 'cookie',
+			'field' => 'remember_me',
+			'value' => $value,
+			'user_id' => $id,
+			'user_agent' => $uAgent,
+			'ending_at' => date("Y-m-d H:i:s", time() + REMEMBER_ME_COOKIE_EXPIRY)
+		];
+
+		$userTokens = new User_Tokens_Model;
+		$userTokens->create($data);
 	}
 }

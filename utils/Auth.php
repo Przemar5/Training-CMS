@@ -26,8 +26,8 @@ class Auth
 		if (isset($_SESSION[USER_ID_SESSION_NAME]) && preg_match($pattern, $_SESSION[USER_ID_SESSION_NAME])) 
 		{
 			$db = self::getDb();
-			$result = $db->select('users', 'role', ['id' => $_SESSION[USER_ID_SESSION_NAME]]);
-			
+			$result = $db->select('users', 'id, role', ['id' => $_SESSION[USER_ID_SESSION_NAME]]);
+//			dd($result);
 			if ($result) 
 			{
 				$role = $result['role'];
@@ -64,15 +64,15 @@ class Auth
 	
 	public static function hasPermission($user)
 	{
-		if (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id']))
+		if (isset($_SESSION[USER_ID_SESSION_NAME]) && is_numeric($_SESSION[USER_ID_SESSION_NAME]))
 		{
 			$db = self::getDb();
-			$loggedPerson = $db->select('users', 'role', ['id' => $_SESSION['user_id']]);
+			$loggedPerson = $db->select('users', 'role', ['id' => $_SESSION[USER_ID_SESSION_NAME]]);
 			
 			if (!empty($loggedPerson))
 			{
-				if ($user['role'] === 'default' ||
-				   ($user['role'] === 'admin' && $loggedPerson['role'] === 'owner'))
+				if (($user['role'] === 'admin' && $loggedPerson['role'] === 'owner') ||
+				   ($user['role'] === 'default' && ($loggedPerson['role'] === 'admin' || $loggedPerson['role'] === 'owner')))
 				{
 					return true;
 				}

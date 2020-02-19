@@ -25,6 +25,6 @@ class User_Model extends Model
 	
 	public function delete($id)
 	{
-		return $this->db->delete('users', "id = $id");
+		return $this->db->delete('users', "id = $id", 1);
 	}
 }
